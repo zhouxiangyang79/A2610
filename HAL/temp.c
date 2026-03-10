@@ -59,7 +59,8 @@
 
 void AdcInit(void)
 {
-    GPIOA_ModeCfg(GPIO_Pin_7, GPIO_ModeIN_Floating); // 选择adc通道11做采样，对应 PA7(AIN11)
+    // A2610 热敏电阻 ADC 引脚: PA1 (AIN1)
+    GPIOA_ModeCfg(GPIO_Pin_1, GPIO_ModeIN_Floating); // 选择adc通道1做采样，对应 PA1(AIN1)
 }
 
 __HIGH_CODE
@@ -71,7 +72,7 @@ double AdcPolling(void)
 
     ADC_ExtSingleChSampInit(SampleFreq_3_2, ADC_PGA_0);
     RoughCalib_Value = ADC_DataCalib_Rough(); // 用于计算ADC内部偏差，记录到全局变量 RoughCalib_Value中
-    ADC_ChannelCfg(11);
+    ADC_ChannelCfg(1); // A2610 使用通道1 (PA1)
     result = ADC_ExcutSingleConver() + RoughCalib_Value;
     res = result * 1.05f / (2048 * 1);
     if (result > 4000)

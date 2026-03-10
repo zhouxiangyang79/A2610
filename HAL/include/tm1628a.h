@@ -10,14 +10,15 @@
 
 #include "config.h"
 
-#define TM1628A_DIO_L   GPIOB_SetBits(GPIO_Pin_0)
-#define TM1628A_DIO_H   GPIOB_ResetBits(GPIO_Pin_0)
+// A2610 TM1628 引脚配置: PA14(DATA), PA3(STB), PA15(WR/CLK)
+#define TM1628A_DIO_L   GPIOA_SetBits(GPIO_Pin_14)
+#define TM1628A_DIO_H   GPIOA_ResetBits(GPIO_Pin_14)
 
-#define TM1628A_CLK_L   GPIOB_SetBits(GPIO_Pin_1)
-#define TM1628A_CLK_H   GPIOB_ResetBits(GPIO_Pin_1)
+#define TM1628A_CLK_L   GPIOA_SetBits(GPIO_Pin_15)
+#define TM1628A_CLK_H   GPIOA_ResetBits(GPIO_Pin_15)
 
-#define TM1628A_STB_L   GPIOB_SetBits(GPIO_Pin_3)
-#define TM1628A_STB_H   GPIOB_ResetBits(GPIO_Pin_3)
+#define TM1628A_STB_L   GPIOA_SetBits(GPIO_Pin_3)
+#define TM1628A_STB_H   GPIOA_ResetBits(GPIO_Pin_3)
 
 #define CMD_SET_DISMODE                             0x03
 #define CMD_WRITEREG_AUTOADD                        0x40    //地址自动增加  普通模式

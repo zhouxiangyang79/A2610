@@ -9,14 +9,15 @@
 
 #include "config.h"
 
-#define SET_SCL_LOW()       GPIOA_ResetBits(GPIO_Pin_2)
-#define SET_SCL_HIGH()      GPIOA_SetBits(GPIO_Pin_2)
+// A2610 HP203B I2C 引脚配置: PB20(SDA), PB21(SCL)
+#define SET_SCL_LOW()       GPIOB_ResetBits(GPIO_Pin_21)
+#define SET_SCL_HIGH()      GPIOB_SetBits(GPIO_Pin_21)
 
-#define SET_SDA_LOW()       GPIOA_ResetBits(GPIO_Pin_1)
-#define SET_SDA_HIGH()      GPIOA_SetBits(GPIO_Pin_1)
-#define PIN_SDA_IN()        GPIOA_ModeCfg(GPIO_Pin_1, GPIO_ModeIN_Floating)
-#define PIN_SDA_OUT()       GPIOA_ModeCfg(GPIO_Pin_1, GPIO_ModeOut_PP_5mA)
-#define READ_PIN_SDA()      GPIOA_ReadPortPin(GPIO_Pin_1)
+#define SET_SDA_LOW()       GPIOB_ResetBits(GPIO_Pin_20)
+#define SET_SDA_HIGH()      GPIOB_SetBits(GPIO_Pin_20)
+#define PIN_SDA_IN()        GPIOB_ModeCfg(GPIO_Pin_20, GPIO_ModeIN_Floating)
+#define PIN_SDA_OUT()       GPIOB_ModeCfg(GPIO_Pin_20, GPIO_ModeOut_PP_5mA)
+#define READ_PIN_SDA()      GPIOB_ReadPortPin(GPIO_Pin_20)
 
 #define HP20X_ADDR 0xEC //CSB_PIN = 1
 

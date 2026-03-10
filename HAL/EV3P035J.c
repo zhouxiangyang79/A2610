@@ -18,14 +18,15 @@ uint8_t rb1_buff[8];
  *****************************************************************************/
 void vEV3P035JInit(void)
 {
-    //GPIOB_ModeCfg(GPIO_Pin_5 , GPIO_ModeIN_PU);
-    //GPIOB_ModeCfg(GPIO_Pin_6 , GPIO_ModeIN_PU);
-    GPIOB_SetBits(GPIO_Pin_5);
-    GPIOB_SetBits(GPIO_Pin_6);
-    GPIOB_ModeCfg(GPIO_Pin_5 , GPIO_ModeOut_PP_5mA);
-    GPIOB_ModeCfg(GPIO_Pin_6 , GPIO_ModeOut_PP_5mA);
-    GPIOB_ResetBits(GPIO_Pin_5);
-    GPIOB_ResetBits(GPIO_Pin_6);
+    // A2610 语音控制引脚: PA12(NRST), PA13(CTRL)
+    //GPIOA_ModeCfg(GPIO_Pin_12 , GPIO_ModeIN_PU);
+    //GPIOA_ModeCfg(GPIO_Pin_13 , GPIO_ModeIN_PU);
+    GPIOA_SetBits(GPIO_Pin_12);
+    GPIOA_SetBits(GPIO_Pin_13);
+    GPIOA_ModeCfg(GPIO_Pin_12 , GPIO_ModeOut_PP_5mA);
+    GPIOA_ModeCfg(GPIO_Pin_13 , GPIO_ModeOut_PP_5mA);
+    GPIOA_ResetBits(GPIO_Pin_12);
+    GPIOA_ResetBits(GPIO_Pin_13);
 //    RB_Init(&rb1,rb1_buff,8);
 }
 
@@ -93,15 +94,16 @@ void vEV3P035JPlay(uint8_t num)
 
         if (num < VOICE_MAX)
         {
-            GPIOB_SetBits(GPIO_Pin_6);
+            // A2610 语音控制: PA12(NRST), PA13(CTRL)
+            GPIOA_SetBits(GPIO_Pin_12);
             DelayUs(100);
-            GPIOB_ResetBits(GPIO_Pin_6);
+            GPIOA_ResetBits(GPIO_Pin_12);
             DelayUs(150);
             for (int i = 0; i < num; i++)
             {
-                GPIOB_SetBits(GPIO_Pin_5);
+                GPIOA_SetBits(GPIO_Pin_13);
                 DelayUs(150);
-                GPIOB_ResetBits(GPIO_Pin_5);
+                GPIOA_ResetBits(GPIO_Pin_13);
                 DelayUs(150);
             }
         }

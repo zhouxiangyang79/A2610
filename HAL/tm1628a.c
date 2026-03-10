@@ -171,12 +171,13 @@ void TM1628A_updataDisRAM_ManuAddAll(u8 add,u8 *dat)
 
 void TM1628A_GpioInit(void)
 {
-    GPIOB_SetBits(GPIO_Pin_0);
-    GPIOB_SetBits(GPIO_Pin_1);
-    GPIOB_SetBits(GPIO_Pin_3);
-    GPIOB_ModeCfg(GPIO_Pin_0 , GPIO_ModeOut_PP_5mA);
-    GPIOB_ModeCfg(GPIO_Pin_1 , GPIO_ModeOut_PP_5mA);
-    GPIOB_ModeCfg(GPIO_Pin_3 , GPIO_ModeOut_PP_5mA);
+    // A2610 TM1628 GPIO 初始化: PA14(DATA), PA3(STB), PA15(WR/CLK)
+    GPIOA_SetBits(GPIO_Pin_14);
+    GPIOA_SetBits(GPIO_Pin_3);
+    GPIOA_SetBits(GPIO_Pin_15);
+    GPIOA_ModeCfg(GPIO_Pin_14 , GPIO_ModeOut_PP_5mA);
+    GPIOA_ModeCfg(GPIO_Pin_3 , GPIO_ModeOut_PP_5mA);
+    GPIOA_ModeCfg(GPIO_Pin_15 , GPIO_ModeOut_PP_5mA);
     DelayMs(2);
 }
 /*****************************************************************************
