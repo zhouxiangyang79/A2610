@@ -17,7 +17,8 @@
 #include "gattprofile.h"
 #include "peripheral.h"
 #include "RF_PHY.h"
-#include "wifi_a2610.h"
+#include "wifi.h"
+#include "uart3.h"
 
 /*********************************************************************
  * GLOBAL TYPEDEFS
@@ -90,8 +91,9 @@ int main(void)
 	GAPRole_PeripheralInit();
 	Peripheral_Init();
 	
-	// A2610 WiFi 初始化
-	WiFi_Init();
+	// A2610 WiFi 初始化 (使用 A2409PW 的 WiFi 驱动)
+	wifi_init();
+	UART3_INIT();
 	PRINT("WiFi Init OK\n");
 	
 #if WWDG_EN==1
