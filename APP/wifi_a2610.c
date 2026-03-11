@@ -1,7 +1,7 @@
 /********************************** (C) COPYRIGHT *******************************
  * File Name          : wifi_a2610.c
  * Description        : A2610 WiFi 模块 (ESP8266)
- *                    - UART1: PA4(TX), PA5(RX)
+ *                    - UART3: PA4(TX), PA5(RX)
  *                    - RST: PA6
  *                    - 基于 A2200BS 工程添加
  ********************************************************************************/
@@ -56,11 +56,12 @@ void WiFi_Init(void)
     GPIOA_ModeCfg(GPIO_Pin_6, GPIO_ModeOut_PP_5mA);
     GPIOA_SetBits(GPIO_Pin_6);
     
-    // 配置 UART1: PA4(TX), PA5(RX) - 注意：与 HAL/uart1.c 共享 UART1
-    // WiFi 使用 115200 波特率，与原有 4800 波特率不同
-    // 需要在使用 WiFi 时重新配置 UART1
+    // 配置 UART3: PA4(TX), PA5(RX)
     GPIOA_ModeCfg(GPIO_Pin_4, GPIO_ModeOut_PP_5mA);  // TX
     GPIOA_ModeCfg(GPIO_Pin_5, GPIO_ModeIN_PU);       // RX
+    
+    // 配置 UART3
+    WiFi_UART_Config();
     
     // 清空缓冲区
     wifiRxHead = 0;
@@ -75,16 +76,17 @@ void WiFi_Init(void)
 /*********************************************************************
  * @fn      WiFi_UART_Config
  *
- * @brief   配置 UART1 为 WiFi 模式 (115200)
+ * @brief   配置 UART3 为 WiFi 模式 (115200)
  *
  * @return  none
  */
 void WiFi_UART_Config(void)
 {
-    UART1_DefInit();
-    UART1_BaudRateCfg(115200);
-    UART1_ByteTrigCfg(UART_1BYTE_TRIG);
-    UART1_INTCfg(ENABLE, RB_IER_RECV_RDY);
+    UART3_DefInit();
+    UART3_BaudRateCfg(115200);
+    UART3_ByteTrigCfg(UART_1BYTE_TRIG);
+    UART3_INTCfg(ENABLE, RB_IER_RECV_RDY);
+    PFIC_EnableIRQ(UART3_IRQn);
 }
 
 /*********************************************************************
@@ -208,11 +210,9 @@ void WiFi_Process(void)
  */
 void WiFi_SendAT(char* cmd)
 {
-    // 临时配置 UART1 为 WiFi 波特率
-    WiFi_UART_Config();
     while(*cmd)
     {
-        UART1_SendByte(*cmd++);
+        UART3_SendByte(*cmd++);
     }
 }
 
@@ -237,7 +237,7 @@ void WiFi_SendData(uint8_t* data, uint8_t len)
     
     for(uint8_t i = 0; i < len; i++)
     {
-        UART1_SendByte(data[i]);
+        UART3_SendByte(data[i]);
     }
 }
 
@@ -516,20 +516,26 @@ uint8_t WiFi_VerifyCRC(uint8_t cmd, uint8_t len, uint8_t* data, uint8_t crc)
 }
 
 /*********************************************************************
- * @fn      WiFi_UART_IRQHandler
+ * @fn      UART3_IRQHandler
  *
- * @brief   WiFi UART1 中断处理 - 在 HAL/uart1.c 中调用
- *
- * @param   data - 接收到的数据
+ * @brief   UART3 中断处理 - WiFi 数据接收
  *
  * @return  none
  */
-void WiFi_UART_IRQHandler(uint8_t data)
+__attribute__((interrupt("WCH-Interrupt-fast")))
+void UART3_IRQHandler(void)
 {
-    uint16_t next = (wifiRxHead + 1) % WIFI_RX_BUF_SIZE;
-    if(next != wifiRxTail)
+    if(UART3_GetITFlag(UART3_IT_FLAG_RX_FIFO_RDY))
     {
-        wifiRxBuf[wifiRxHead] = data;
-        wifiRxHead = next;
+        while(UART3_GetFlagStatus(UART3_FLAG_RX_FIFO_RDY))
+        {
+            uint8_t data = UART3_ReceiveByte();
+            uint16_t next = (wifiRxHead + 1) % WIFI_RX_BUF_SIZE;
+            if(next != wifiRxTail)
+            {
+                wifiRxBuf[wifiRxHead] = data;
+                wifiRxHead = next;
+            }
+        }
     }
 }

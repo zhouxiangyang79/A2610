@@ -26,9 +26,9 @@ typedef enum {
 #define WIFI_CMD_REPORT_STATUS  0x10
 #define WIFI_CMD_HEARTBEAT      0x20
 
-/* A2610 硬件引脚定义 */
-#define WIFI_UART               UART1
-#define WIFI_UART_IRQn          UART1_IRQn
+/* A2610 硬件引脚定义 - UART3: PA4(TX), PA5(RX) */
+#define WIFI_UART               UART3
+#define WIFI_UART_IRQn          UART3_IRQn
 #define WIFI_BAUDRATE           115200
 
 #define WIFI_RST_PIN            GPIO_Pin_6   // PA6
@@ -61,6 +61,6 @@ uint8_t WiFi_CalcCRC(uint8_t* data, uint8_t len);
 uint8_t WiFi_VerifyCRC(uint8_t cmd, uint8_t len, uint8_t* data, uint8_t crc);
 
 /* 中断处理 */
-void UART1_IRQHandler(void);
+void UART3_IRQHandler(void);
 
 #endif /* WIFI_A2610_H */
