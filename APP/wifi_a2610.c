@@ -56,16 +56,11 @@ void WiFi_Init(void)
     GPIOA_ModeCfg(GPIO_Pin_6, GPIO_ModeOut_PP_5mA);
     GPIOA_SetBits(GPIO_Pin_6);
     
-    // 配置 UART1: PA4(TX), PA5(RX)
+    // 配置 UART1: PA4(TX), PA5(RX) - 注意：与 HAL/uart1.c 共享 UART1
+    // WiFi 使用 115200 波特率，与原有 4800 波特率不同
+    // 需要在使用 WiFi 时重新配置 UART1
     GPIOA_ModeCfg(GPIO_Pin_4, GPIO_ModeOut_PP_5mA);  // TX
     GPIOA_ModeCfg(GPIO_Pin_5, GPIO_ModeIN_PU);       // RX
-    
-    UART1_DefInit();
-    UART1_BaudRateCfg(115200);
-    
-    // 使能接收中断
-    UART1_INTCfg(ENABLE, RB_IER_RECV_RDY);
-    PFIC_EnableIRQ(UART1_IRQn);
     
     // 清空缓冲区
     wifiRxHead = 0;
@@ -75,6 +70,21 @@ void WiFi_Init(void)
     g_wifiConnected = 0;
     
     PRINT("WiFi Init OK\n");
+}
+
+/*********************************************************************
+ * @fn      WiFi_UART_Config
+ *
+ * @brief   配置 UART1 为 WiFi 模式 (115200)
+ *
+ * @return  none
+ */
+void WiFi_UART_Config(void)
+{
+    UART1_DefInit();
+    UART1_BaudRateCfg(115200);
+    UART1_ByteTrigCfg(UART_1BYTE_TRIG);
+    UART1_INTCfg(ENABLE, RB_IER_RECV_RDY);
 }
 
 /*********************************************************************
@@ -198,6 +208,8 @@ void WiFi_Process(void)
  */
 void WiFi_SendAT(char* cmd)
 {
+    // 临时配置 UART1 为 WiFi 波特率
+    WiFi_UART_Config();
     while(*cmd)
     {
         UART1_SendByte(*cmd++);
@@ -504,26 +516,20 @@ uint8_t WiFi_VerifyCRC(uint8_t cmd, uint8_t len, uint8_t* data, uint8_t crc)
 }
 
 /*********************************************************************
- * @fn      UART1_IRQHandler
+ * @fn      WiFi_UART_IRQHandler
  *
- * @brief   UART1 中断处理
+ * @brief   WiFi UART1 中断处理 - 在 HAL/uart1.c 中调用
+ *
+ * @param   data - 接收到的数据
  *
  * @return  none
  */
-__attribute__((interrupt("WCH-Interrupt-fast")))
-void UART1_IRQHandler(void)
+void WiFi_UART_IRQHandler(uint8_t data)
 {
-    if(UART1_GetITFlag(UART1_IT_FLAG_RX_FIFO_RDY))
+    uint16_t next = (wifiRxHead + 1) % WIFI_RX_BUF_SIZE;
+    if(next != wifiRxTail)
     {
-        while(UART1_GetFlagStatus(UART1_FLAG_RX_FIFO_RDY))
-        {
-            uint8_t data = UART1_ReceiveByte();
-            uint16_t next = (wifiRxHead + 1) % WIFI_RX_BUF_SIZE;
-            if(next != wifiRxTail)
-            {
-                wifiRxBuf[wifiRxHead] = data;
-                wifiRxHead = next;
-            }
-        }
+        wifiRxBuf[wifiRxHead] = data;
+        wifiRxHead = next;
     }
 }

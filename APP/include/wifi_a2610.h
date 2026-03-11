@@ -43,6 +43,7 @@ extern uint8_t g_wifiConnected;
 void WiFi_Init(void);
 void WiFi_Reset(void);
 void WiFi_Process(void);
+void WiFi_UART_Config(void);
 
 void WiFi_SendAT(char* cmd);
 void WiFi_SendData(uint8_t* data, uint8_t len);
